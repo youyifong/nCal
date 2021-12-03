@@ -1,0 +1,110 @@
+# error term is normally distributed, informative priors are assumed
+model {
+
+    ####################################################################################
+    # k indexes rows of the data frame, K is the total number of standard samples
+    for (k in 1:K) {
+        y[k] ~ dnorm   (mu[k], tau[i.curve[k], T[i.curve[k],replicate[k],seqno[k]]+1]) 
+        mu[k] <- c[i.curve[k],replicate[k]] + (d[i.curve[k],replicate[k]]-c[i.curve[k],replicate[k]])/(1+u[k])**f[i.curve[k],replicate[k]]
+        u[k] <- exp(b[i.curve[k],replicate[k]]*(t[k]-loge[i.curve[k],replicate[k]]))
+    }
+    
+#    # unknown samples, J is the number of unknown samples, if J is 0, nothing happens
+#    for (j in (K+1):(K+J)) {
+#        y[j] ~ dnorm   (mu[j], tau[i.curve[j], T.unk[j-K]+1]) 
+#        mu[j] <- c[i.curve[j]] + (d[i.curve[j]]-c[i.curve[j]])/(1+u[j])**f[i.curve[j]]
+#        u[j] <- exp(b[i.curve[j]]*(t.unk[j-K]-loge[i.curve[j]]))
+#        
+#        t.unk[j-K] <- t.unk.sample[sample_id[j]]        
+#        T.unk[j-K] ~ dbern(mixp) 
+#    }
+#    # s indexes unknown sample 
+#    for (s in 1:S) {
+#        # priors for unknown sample concentrations
+#        t.unk.sample[s] ~ dunif(t.min, t.max)
+#    }
+    
+
+    ####################################################################################
+    # 5PL parameters, i indexes assays/curves
+    for (i in 1:I) {
+      for (r in 1:2) { 
+        b[i,r] <- -exp(logmb[i,r])
+        e[i,r] <- exp(loge[i,r])
+        f[i,r] <- exp(logf[i,r])
+        h[i,r] <- exp(logh[i,r])
+        loge[i,r] <- g[i,r] + (1/b[i,r])*logf[i,r]
+        logmb[i,r] <- logh[i,r]-log(d[i,r]-c[i,r])+(exp(logf[i,r])+1)*log(1+(1/exp(logf[i,r])))
+        
+        c[i,r] <- theta[i,1] + theta.r[i,r,1]
+        d[i,r] <- theta[i,2] + theta.r[i,r,2]
+        g[i,r] <- theta[i,3] + theta.r[i,r,3]
+        logh[i,r] <- theta[i,4] + theta.r[i,r,4]
+        logf[i,r] <- theta[i,5] + theta.r[i,r,5]
+        
+        theta.r[i,r,1:5] ~ dmnorm(c0, W)
+      }
+      theta[i,1:5] ~ dmnorm(theta.0, TAO)
+      
+    }
+    # informative prior
+    theta.0 ~ dmnorm(v, m) # informative prior
+    TAO ~ dwish(R, dof.wish) # informative prior
+    W ~ dwish(R0, dof.wish.0) # diffuse prior
+    
+    for (i0 in 1:5) {
+        c0[i0] <- 0
+    }
+
+#    # diffuse prior
+#    theta.0 ~ dmnorm(v0, m0) # diffuse prior
+#    TAO ~ dwish(R0, dof.wish.0) # diffuse prior
+#    # fixed prior
+#    TAO <- precision.matrix # fixed precision
+    
+
+    ####################################################################################
+    # precision of the noise terms
+    for (i in 1:I) {
+        tau[i,1] <- tau1
+    }
+    for (i in 1:I) {
+        tau[i,2] <- tau2    
+    }
+    tau1 ~ dgamma(var.comp[1], var.comp[2])         
+    tau2 <- tau1 / (1+r);   r ~ dexp(0.046)
+    #tau2 <- tau1 / r;   r ~ dgamma(2.3,.08) 
+    #tau2 ~ dgamma(var.comp.2[1], var.comp.2[2])         
+    #tau2 <- tau1 / (1+r);   r ~ dunif(0,20)
+
+    # i indexes curves
+    # r indexes replicate
+    # l indexes dilutions within a curve
+    # component indicators. T[]=0 is the first component of noise distribution; 1 is the second component
+    for (i in 1:I) {
+        # assuming there are two replicates
+        for (r in 1:2) {
+            T[i,r,1] <- 0
+            for (l in 2:nDil) {
+                T[i,r,l] <- 0
+            }
+        }
+    }
+    alpha <- 0
+
+
+    ####################################################################################
+    # functions of parameters
+    for (i in 1:I) {
+        sigma[i,1]<-sqrt(1/tau[i,1])
+        sigma[i,2]<-sqrt(1/tau[i,2])
+        
+        # using the average of two curves as the plate-level summary
+        pc[i] <- (c[i,1]+c[i,2])/2
+        pd[i] <- (d[i,1]+d[i,2])/2
+        pg[i] <- (g[i,1]+g[i,2])/2
+        ph[i] <- exp((logh[i,1]+logh[i,2])/2)
+        pf[i] <- exp((logf[i,1]+logf[i,2])/2)
+    }
+    
+}

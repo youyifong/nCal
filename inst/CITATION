@@ -1,0 +1,12 @@
+citHeader("To cite the nCal package in publications use the following. To cite methodology behind the implementation, please see individual function manuals.")
+
+citEntry(entry="Article",
+         title = "nCal: a R package for nonlinear calibration.",
+         author = personList(as.person("Youyi Fong"), as.person("Krisz Sebestyen"), as.person("Xuesong Yu"), as.person("Peter Gilbert"), as.person("Steve Self")),
+         journal      = "Bioinformatics",
+         year         = "2013",
+	     volume       = "DOI:10.1093/bioinformatics/btt456",
+         textVersion = 
+         paste("Fong, Sebestyen, Yu, Gilbert, Self (2013).", 
+               "nCal: a R package for nonlinear calibration. Bioinformatics, DOI:10.1093/bioinformatics/btt456")
+)

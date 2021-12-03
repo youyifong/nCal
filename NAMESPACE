@@ -1,0 +1,42 @@
+export(rumi, ncal, ncal.formula, ncal.character)
+export(bcrm, coef.bcrm, vcov.bcrm, plot.bcrm, print.bcrm, getVarComponent.bcrm, get.single.fit)
+export(drm.fit, getVarComponent.drc)
+export(crm.fit, deviance.crm, lines.crm, coef.crm)
+
+export(gh2cla, cla2gh, cla2ed50, ed502cla, ed50b2cla, cla2ed50b)
+export(FivePL.t, FivePL.x.inv.func, FivePL.t.func, FivePL.x, FivePL.x.inv, FivePL.t.inv, FivePL.t.inv.func, FourPL.x, FourPL.t.func, FourPL.x.inv)
+export(vpl1.deriv, vpl1.deriv.func, vpl2.deriv, vpl2.deriv.func, vpl3.deriv, vpl3.deriv.func)
+export(ED5PL, plot5PL, getConc, lines5PL, gnls.fit)
+
+export(get.S1, get.S2, get.abc, get.abs.dev)
+export(get.curve.param.list, simulate1curve)
+
+export(ncalGUI)
+
+
+S3method(coef,bcrm) 
+S3method(coef,crm)
+S3method(deviance,crm)
+S3method(getVarComponent,bcrm)
+S3method(getVarComponent,drc)
+S3method(lines,crm)
+S3method(ncal,character)
+S3method(ncal,formula)
+S3method(plot,bcrm)
+S3method(print,bcrm)
+S3method(print,crm)
+S3method(vcov,bcrm)
+
+
+import(drc, kyotil, gWidgets2)
+importFrom(gdata, xls2sep, sheetNames)
+
+  importFrom("grDevices", "dev.off")
+  importFrom("graphics", "abline", "legend", "lines", "par", "plot",
+             "points", "title")
+  importFrom("stats", "aggregate", "as.formula", "coef", "cov",
+             "density", "fitted", "integrate", "lm", "median",
+             "model.frame", "na.omit", "optim", "qt", "quantile",
+             "resid", "rnorm", "runif", "sd", "splinefun", "uniroot",
+             "var", "vcov")
+  importFrom("utils", "capture.output", "read.csv", "write.csv")

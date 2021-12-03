@@ -1,0 +1,69 @@
+model {
+
+    # k indexes rows of the data frame, K is the total number of standard samples
+    # standard samples, K is the total number of standard samples
+    for (k in 1:K) {
+        y[k] ~ dt   (mu[k], tau[i.curve[k]], 4) 
+        # 5PL mean curve
+        mu[k] <- c[i.curve[k]] + (d[i.curve[k]]-c[i.curve[k]])/(1+u[k])**f[i.curve[k]]
+        u[k] <- exp(b[i.curve[k]]*(t[k]-loge[i.curve[k]]))
+    }
+#    # comment out unknown for now    
+#    # unknown samples, J is the number of unknown samples, if J is 0, nothing happens
+#    for (j in (K+1):(K+J)) {
+#        y[j] ~ dnorm   (mu[j], tau[i.curve[j], T.unk[j-K]+1]) 
+#        mu[j] <- c[i.curve[j]] + (d[i.curve[j]]-c[i.curve[j]])/(1+u[j])**f[i.curve[j]]
+#        u[j] <- exp(b[i.curve[j]]*(t.unk[j-K]-loge[i.curve[j]]))
+#        
+#        t.unk[j-K] <- t.unk.sample[sample_id[j]]        
+#        T.unk[j-K] ~ dbern(mixp) 
+#    }
+#    # s indexes unknown sample 
+#    for (s in 1:S) {
+#        # priors for unknown sample concentrations
+#        t.unk.sample[s] ~ dunif(t.min, t.max)
+#    }
+    
+
+    # 5PL parameters
+    # i indexes assays/curves
+    for (i in 1:I) {
+        b[i] <- -exp(logmb[i])
+        e[i] <- exp(loge[i])
+        f[i] <- exp(logf[i])
+        h[i] <- exp(logh[i])
+        loge[i] <- g[i] + (1/b[i])*logf[i]
+        logmb[i] <- logh[i]-log(d[i]-c[i])+(exp(logf[i])+1)*log(1+(1/exp(logf[i])))
+        
+        c[i] <- theta[i,1]
+        d[i] <- theta[i,2]
+        g[i] <- theta[i,3]
+        logh[i] <- theta[i,4]
+        logf[i] <- theta[i,5]
+        
+        theta[i,1:5] ~ dmnorm(theta.0, TAO)
+    }
+    # informative prior
+    theta.0 ~ dmnorm(v, m) # informative prior
+    TAO ~ dwish(R, dof.wish) # informative prior
+#    # diffuse prior
+#    theta.0 ~ dmnorm(v0, m0) # diffuse prior
+#    TAO ~ dwish(R0, dof.wish.0) # diffuse prior
+#    # fixed prior
+#    TAO <- precision.matrix # fixed precision
+    
+
+    ####################################################################################
+    # precision of the noise terms
+    for (i in 1:I) {
+        tau[i] <- tau1
+    }
+    tau1 ~ dgamma(var.comp[1], var.comp[2])         
+
+
+    # functions of parameters
+    for (i in 1:I) {
+        sigma[i]<-sqrt(1/tau[i])
+    }
+    
+}

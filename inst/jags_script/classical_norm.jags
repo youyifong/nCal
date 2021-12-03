@@ -1,0 +1,92 @@
+model {
+
+    # k indexes rows of the data frame
+    # standard samples, K is the total number of standard samples
+    for (k in 1:K) {
+        y[k] ~ dnorm   (mu[k], tau[i.curve[k], T[i.curve[k],replicate[k],seqno[k]]+1]) 
+        # 5PL mean curve
+        mu[k] <- c[i.curve[k]] + (d[i.curve[k]]-c[i.curve[k]])/(1+u[k])**f[i.curve[k]]
+        u[k] <- exp(b[i.curve[k]]*(t[k]-loge[i.curve[k]]))
+    }
+    # comment out unknown for now
+#    # unknown samples, J is the number of unknown samples
+#    for (j in (K+1):(K+J)) {
+#        T[j] ~ dbern(mixp) 
+#        y[j] ~ dnorm   (mu[j], tau[i.curve[j], T[j]+1]) 
+#        mu[j] <- c[i.curve[j]] + (d[i.curve[j]]-c[i.curve[j]])/pow(1+exp(-exp(log.minus.b[i.curve[j]])*t.unk[j-K]+exp(log.minus.b[i.curve[j]])*log.e[i.curve[j]]), exp(log.f[i.curve[j]]))
+#        t.unk[j-K] <- t.unk.sample[sample_id[j]]
+#    }
+#    # priors for unknown sample concentrations, S is the number of unknown sample ids
+#    for (s in 1:S) {
+#        t.unk.sample[s] ~ dunif(t.min, t.max)
+#    }
+
+
+
+
+    
+    # i indexes curves
+    # r indexes replicate
+    # l indexes dilutions within a curve
+    # component indicators. T[]=0 is the first component of noise distribution; 1 is the second component
+    for (i in 1:I) {
+        # assuming there are two replicates
+        for (r in 1:2) {
+            T[i,r,1] <- 0
+            for (l in 2:nDil) {
+                T[i,r,l] <- 0
+            }
+        }
+    }
+    mixp ~ dunif(0,0.5)
+    alpha ~ dunif(0,1)
+    # alpha <- 0.5
+    
+    # 5PL parameters
+    # i indexes assays/curves
+    for (i in 1:I) {
+        b[i] <- -exp(logmb[i])
+        e[i] <- exp(loge[i])
+        f[i] <- exp(logf[i])
+        g[i] <- loge[i]-(1/b[i])*logf[i]
+        h[i] <- -b[i]*(d[i]-c[i])/(1+(1/f[i]))^(f[i]+1)
+        
+        
+        c[i] <- theta[i,1]
+        d[i] <- theta[i,2]
+        loge[i] <- theta[i,3]
+        logmb[i] <- theta[i,4]
+        logf[i] <- theta[i,5]
+        
+        theta[i,1:5] ~ dmnorm(theta.0, TAO)
+    }
+    # informative prior
+    theta.0 ~ dmnorm(v, m) # informative prior
+    TAO ~ dwish(R, dof.wish) # informative prior
+#    # diffuse prior
+#    theta.0 ~ dmnorm(v0, m0) # diffuse prior
+#    TAO ~ dwish(R0, dof.wish.0) # diffuse prior
+#    # fixed prior
+#    TAO <- precision.matrix # fixed precision
+    
+
+    ####################################################################################
+    # precision of the noise terms, this part is not different from mixnorm model, but T is all 0
+    for (i in 1:I) {
+        tau[i,1] <- tau1
+    }
+    for (i in 1:I) {
+        tau[i,2] <- tau2    
+    }
+    tau1 ~ dgamma(var.comp[1], var.comp[2])         
+    tau2 <- tau1 / (1+r);   r ~ dexp(0.046)
+    #tau2 ~ dgamma(var.comp.2[1], var.comp.2[2])         
+    
+
+    # functions of parameters
+    for (i in 1:I) {
+        sigma[i,1]<-sqrt(1/tau[i,1])
+        sigma[i,2]<-sqrt(1/tau[i,2])
+    }
+    
+}

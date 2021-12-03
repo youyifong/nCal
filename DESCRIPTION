@@ -1,0 +1,12 @@
+Package: nCal
+LazyLoad: yes
+LazyData: yes
+Version: 2021.11-30
+Title: Nonlinear Calibration
+Author: Youyi Fong <youyifong@gmail.com>, Krisztian Sebestyen <ksebestyen@gmail.com>, Xuesong Yu <xyu@scharp.org>
+Maintainer: Youyi Fong <youyifong@gmail.com>
+Depends: R (>= 3.3.0), drc, gdata, kyotil, gWidgets2
+Suggests: knitr, RUnit, rjags, nlme, R.rsp
+VignetteBuilder: R.rsp 
+Description: Performs nonlinear calibration and curve fitting for data from Luminex, RT-PCR, ELISA, RPPA etc. Its precursor is Ruminex. This package is described in Fong et al. (2013) <DOI:10.1093/bioinformatics/btt456>.
+License: GPL (>= 2)
